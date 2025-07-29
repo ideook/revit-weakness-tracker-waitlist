@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-gray-900 font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+
+  p {
+    @apply leading-relaxed-plus;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-blue text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg hover:shadow-primary-blue/25 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:ring-opacity-50 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-primary-blue border border-primary-blue px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:bg-primary-blue hover:text-white hover:shadow-lg hover:shadow-primary-blue/25 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:ring-opacity-50;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all duration-500 hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-2;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-primary-blue focus:ring-2 focus:ring-primary-blue focus:ring-opacity-20 outline-none transition-all duration-300;
+  }
+
+  .section-spacing {
+    @apply py-16 md:py-24;
+  }
+
+  .container-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .animate-on-scroll {
+    @apply opacity-0 translate-y-12 transition-all duration-1000 ease-out;
+  }
+
+  .animate-on-scroll.animate {
+    @apply opacity-100 translate-y-0;
+  }
+
+  /* Enhanced hover effects */
+  .hover-lift {
+    @apply transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary-blue/20;
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-300 hover:scale-105;
+  }
+
+  /* Gradient text utilities */
+  .gradient-text-blue {
+    @apply bg-gradient-to-r from-primary-blue to-primary-mint bg-clip-text text-transparent;
+  }
+
+  /* Custom shadows */
+  .shadow-soft {
+    box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.1);
+  }
+
+  .shadow-glow-blue {
+    box-shadow: 0 8px 32px -8px rgba(0, 119, 255, 0.3);
+  }
+
+  .shadow-glow-mint {
+    box-shadow: 0 8px 32px -8px rgba(0, 196, 154, 0.3);
+  }
+}

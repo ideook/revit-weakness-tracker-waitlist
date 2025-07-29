@@ -1,0 +1,36 @@
+{
+  "name": "revit-weakness-tracker-waitlist-v3",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "build:verify": "npm run type-check && npm run lint && npm run build",
+    "preview": "npm run build && npm run start",
+    "clean": "rm -rf .next node_modules/.cache"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@types/node": "^24.1.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "clsx": "^2.1.1",
+    "eslint": "^9.32.0",
+    "eslint-config-next": "^15.4.4",
+    "next": "^15.4.4",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17"
+  }
+}
