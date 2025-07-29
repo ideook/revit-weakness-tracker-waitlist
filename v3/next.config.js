@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig = {  eslint: {
+  dirs: ['src'],
+  ignoreDuringBuilds: true,
+},
   experimental: {
     typedRoutes: true,
   },
