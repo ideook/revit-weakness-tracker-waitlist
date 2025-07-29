@@ -42,11 +42,11 @@ function AnimatedPuzzlePiece({ index, delay = 0 }: { index: number; delay?: numb
   }, [delay]);
   
   const getIntensity = () => {
-    if (index === 5) return 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/30';
-    if (index === 9) return 'bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/30';
-    if (index === 2) return 'bg-gradient-to-r from-purple-400 to-purple-500 text-slate-950 shadow-lg shadow-purple-500/30';
-    if (index % 3 === 0) return 'bg-slate-700/80 text-slate-300';
-    return 'bg-slate-800/60 text-slate-500';
+    if (index === 5) return 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-white shadow-lg shadow-cyan-500/30';
+    if (index === 9) return 'bg-gradient-to-r from-emerald-400 to-emerald-500 text-white shadow-lg shadow-emerald-500/30';
+    if (index === 2) return 'bg-gradient-to-r from-purple-400 to-purple-500 text-white shadow-lg shadow-purple-500/30';
+    if (index % 3 === 0) return 'bg-gray-200 text-gray-700';
+    return 'bg-gray-100 text-gray-500';
   };
   
   return (
@@ -80,8 +80,8 @@ function HeatmapCell({ index, delay = 0 }: { index: number; delay?: number }) {
     if (index === 4 || index === 12 || index === 18) return 'bg-emerald-500 shadow-lg shadow-emerald-500/40';
     if (index === 7 || index === 15 || index === 23) return 'bg-emerald-400 shadow-md shadow-emerald-400/30';
     if (index === 2 || index === 9 || index === 20 || index === 27) return 'bg-emerald-300 shadow-sm shadow-emerald-300/20';
-    if (index % 3 === 0) return 'bg-slate-600';
-    return 'bg-slate-700';
+    if (index % 3 === 0) return 'bg-gray-300';
+    return 'bg-gray-200';
   };
   
   return (
@@ -118,14 +118,14 @@ export default function Home() {
   const featuresInView = useInView(featuresRef, { once: true, margin: "-100px" });
 
   return (
-    <div className="min-h-screen bg-slate-950 relative overflow-hidden">
+    <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Animated Background Elements */}
       <motion.div 
         className="absolute inset-0 opacity-10"
         style={{ y: backgroundY }}
       >
         <motion.div 
-          className="absolute top-20 left-20 w-32 h-32 border border-cyan-400 rounded-lg"
+          className="absolute top-20 left-20 w-32 h-32 border border-cyan-500 rounded-lg opacity-30"
           animate={{ 
             scale: [1, 1.1, 1],
             opacity: [0.3, 0.6, 0.3]
@@ -137,7 +137,7 @@ export default function Home() {
           }}
         />
         <motion.div 
-          className="absolute top-40 right-32 w-24 h-24 border border-emerald-400 rounded-lg"
+          className="absolute top-40 right-32 w-24 h-24 border border-emerald-500 rounded-lg opacity-30"
           animate={{ 
             rotate: [45, 45, 405, 45],
             y: [0, -20, 0, 0]
@@ -149,7 +149,7 @@ export default function Home() {
           }}
         />
         <motion.div 
-          className="absolute bottom-40 left-1/4 w-16 h-16 bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full"
+          className="absolute bottom-40 left-1/4 w-16 h-16 bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full opacity-20"
           animate={{ 
             scale: [1, 1.2, 1],
             opacity: [0.4, 0.8, 0.4]
@@ -161,7 +161,7 @@ export default function Home() {
           }}
         />
         <motion.div 
-          className="absolute top-1/3 right-1/4 w-20 h-20 border-2 border-dashed border-purple-400 rounded-lg"
+          className="absolute top-1/3 right-1/4 w-20 h-20 border-2 border-dashed border-purple-500 rounded-lg opacity-30"
           animate={{ rotate: 360 }}
           transition={{ 
             duration: 8, 
@@ -171,12 +171,12 @@ export default function Home() {
         />
         
         {/* Dashboard Grid Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-950/20 via-slate-950/40 to-emerald-950/20">
-          <div className="grid grid-cols-12 h-full opacity-30">
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-50/60 via-white/80 to-emerald-50/60">
+          <div className="grid grid-cols-12 h-full opacity-20">
             {Array.from({ length: 144 }).map((_, i) => (
               <motion.div 
                 key={i} 
-                className="border-r border-b border-slate-800/30"
+                className="border-r border-b border-gray-200/50"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.3 }}
                 transition={{ delay: i * 0.005, duration: 0.5 }}
@@ -196,10 +196,10 @@ export default function Home() {
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-emerald-400 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/25">
-              <span className="text-slate-950 font-bold text-lg">BS</span>
+            <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/25">
+              <span className="text-white font-bold text-lg">BS</span>
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-cyan-300 to-emerald-300 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-emerald-600 bg-clip-text text-transparent">
               BIMSpark
             </span>
           </div>
@@ -217,7 +217,7 @@ export default function Home() {
               variants={fadeInUp}
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
-              <span className="inline-block px-4 py-2 bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 border border-cyan-500/20 rounded-full text-cyan-300 text-sm font-medium mb-6">
+              <span className="inline-block px-4 py-2 bg-gradient-to-r from-cyan-50 to-emerald-50 border border-cyan-300 rounded-full text-cyan-700 text-sm font-medium mb-6">
                 🚧 PRE-LAUNCH PREVIEW • Coming Early 2025
               </span>
             </motion.div>
@@ -228,19 +228,19 @@ export default function Home() {
               transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
             >
               <motion.span 
-                className="block text-slate-200 mb-2"
+                className="block text-gray-800 mb-2"
                 variants={fadeInUp}
               >
                 BIM used to be
               </motion.span>
               <motion.span 
-                className="block text-slate-500 line-through mb-4"
+                className="block text-gray-500 line-through mb-4"
                 variants={fadeInUp}
               >
                 boring.
               </motion.span>
               <motion.span 
-                className="block bg-gradient-to-r from-cyan-300 via-emerald-300 to-purple-300 bg-clip-text text-transparent"
+                className="block bg-gradient-to-r from-cyan-600 via-emerald-600 to-purple-600 bg-clip-text text-transparent"
                 variants={fadeInUp}
                 animate={{ 
                   backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
@@ -256,13 +256,13 @@ export default function Home() {
             </motion.h1>
             
             <motion.p 
-              className="text-xl md:text-2xl text-slate-300 mb-8 max-w-4xl mx-auto leading-relaxed font-light"
+              className="text-xl md:text-2xl text-gray-700 mb-8 max-w-4xl mx-auto leading-relaxed font-light"
               variants={fadeInUp}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
             >
-              What if your BIM tools <span className="text-cyan-400 font-semibold">could adapt to you?</span> 
+              What if your BIM tools <span className="text-cyan-600 font-semibold">could adapt to you?</span> 
               Soon you'll track productivity, discover hidden patterns, and turn your Revit workflow into 
-              <span className="text-emerald-400 font-semibold"> an engaging puzzle to solve.</span>
+              <span className="text-emerald-600 font-semibold"> an engaging puzzle to solve.</span>
             </motion.p>
             
             <motion.div 
@@ -270,8 +270,8 @@ export default function Home() {
               variants={fadeInUp}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.5 }}
             >
-              <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-4">
-                <div className="flex items-center justify-center space-x-2 text-amber-300">
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 rounded-xl p-4">
+                <div className="flex items-center justify-center space-x-2 text-amber-700">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -284,19 +284,19 @@ export default function Home() {
             
             {/* Data Visualization Mockup */}
             <div className="relative mb-12">
-              <div className="max-w-4xl mx-auto bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
+              <div className="max-w-4xl mx-auto bg-white/90 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 shadow-2xl">
                 <div className="grid md:grid-cols-3 gap-6">
                   {/* Command Heatmap Preview */}
-                  <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30">
-                    <h4 className="text-sm font-semibold text-cyan-300 mb-3">Command Heatmap</h4>
+                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                    <h4 className="text-sm font-semibold text-cyan-600 mb-3">Command Heatmap</h4>
                     <div className="grid grid-cols-4 gap-1">
                       {Array.from({ length: 16 }).map((_, i) => (
                         <motion.div 
                           key={i} 
                           className={`h-3 rounded-sm cursor-pointer hover:brightness-125 transition-all duration-200 ${
-                            i % 3 === 0 ? 'bg-cyan-400' : 
-                            i % 4 === 0 ? 'bg-emerald-400' : 
-                            i % 5 === 0 ? 'bg-purple-400' : 'bg-slate-600'
+                            i % 3 === 0 ? 'bg-cyan-500' : 
+                            i % 4 === 0 ? 'bg-emerald-500' : 
+                            i % 5 === 0 ? 'bg-purple-500' : 'bg-gray-300'
                           }`}
                           initial={{ scale: 0, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
@@ -311,10 +311,10 @@ export default function Home() {
                   </div>
                   
                   {/* Productivity Metrics */}
-                  <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30">
-                    <h4 className="text-sm font-semibold text-emerald-300 mb-3">Productivity Score</h4>
-                    <div className="text-3xl font-bold text-emerald-400 mb-2">87%</div>
-                    <div className="w-full bg-slate-700 rounded-full h-2">
+                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                    <h4 className="text-sm font-semibold text-emerald-600 mb-3">Productivity Score</h4>
+                    <div className="text-3xl font-bold text-emerald-600 mb-2">87%</div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
                       <motion.div 
                         className="bg-gradient-to-r from-emerald-400 to-cyan-400 h-2 rounded-full"
                         initial={{ width: 0 }}
@@ -325,16 +325,16 @@ export default function Home() {
                   </div>
                   
                   {/* Plugin Recommendations */}
-                  <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30">
-                    <h4 className="text-sm font-semibold text-purple-300 mb-3">Smart Plugins</h4>
+                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                    <h4 className="text-sm font-semibold text-purple-600 mb-3">Smart Plugins</h4>
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                        <span className="text-xs text-slate-300">AutoDimension+</span>
+                        <span className="text-xs text-gray-700">AutoDimension+</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
-                        <span className="text-xs text-slate-300">SmartGrid Pro</span>
+                        <span className="text-xs text-gray-700">SmartGrid Pro</span>
                       </div>
                     </div>
                   </div>
@@ -345,48 +345,48 @@ export default function Home() {
             {/* Core Value Propositions */}
             <div className="grid md:grid-cols-3 gap-8 mb-16">
               <div className="group">
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-8 hover:border-cyan-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10">
-                  <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
-                    <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-white backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-cyan-400/60 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/15">
+                  <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold text-cyan-300 mb-4">
+                  <h3 className="text-xl font-bold text-cyan-600 mb-4">
                     Know Your Patterns
                   </h3>
-                  <p className="text-slate-300 leading-relaxed">
+                  <p className="text-gray-700 leading-relaxed">
                     You know Revit. But do you know how <em>you</em> use Revit? Discover your command patterns, productivity metrics, and hidden workflow insights.
                   </p>
                 </div>
               </div>
 
               <div className="group">
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-8 hover:border-emerald-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10">
-                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
-                    <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-white backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-emerald-400/60 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/15">
+                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold text-emerald-300 mb-4">
+                  <h3 className="text-xl font-bold text-emerald-600 mb-4">
                     Smart Plugin Discovery
                   </h3>
-                  <p className="text-slate-300 leading-relaxed">
+                  <p className="text-gray-700 leading-relaxed">
                     Get personalized plugin recommendations based on your actual usage patterns. Stop wasting time—find tools that work for your specific workflow.
                   </p>
                 </div>
               </div>
 
               <div className="group">
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-8 hover:border-purple-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
-                    <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-white backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-purple-400/60 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/15">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold text-purple-300 mb-4">
+                  <h3 className="text-xl font-bold text-purple-600 mb-4">
                     Make Work Feel Like Play
                   </h3>
-                  <p className="text-slate-300 leading-relaxed">
+                  <p className="text-gray-700 leading-relaxed">
                     Transform your BIM workflow into an engaging puzzle. Track progress, compete with peers, and turn productivity into a game you want to win.
                   </p>
                 </div>
@@ -398,14 +398,14 @@ export default function Home() {
           <div className="mb-20">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                <span className="bg-gradient-to-r from-cyan-300 to-emerald-300 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-cyan-600 to-emerald-600 bg-clip-text text-transparent">
                   Imagine if your BIM tools adapted to you
                 </span>
               </h2>
-              <p className="text-xl text-slate-400 max-w-3xl mx-auto mb-4">
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
                 Preview the concepts that will transform how you work with Revit
               </p>
-              <div className="inline-flex items-center px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full text-purple-300 text-sm font-medium">
+              <div className="inline-flex items-center px-4 py-2 bg-purple-50 border border-purple-300 rounded-full text-purple-700 text-sm font-medium">
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
@@ -416,26 +416,26 @@ export default function Home() {
             <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {/* Puzzle-style Dashboard Preview */}
               <div className="group cursor-pointer">
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-6 hover:border-cyan-400/40 transition-all duration-500 hover:shadow-xl hover:shadow-cyan-500/10 hover:scale-105">
+                <div className="bg-white backdrop-blur-sm border border-gray-200 rounded-2xl p-6 hover:border-cyan-400/60 transition-all duration-500 hover:shadow-xl hover:shadow-cyan-500/15 hover:scale-105">
                   <div className="text-center mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:rotate-12 transition-transform duration-500">
-                      <svg className="w-6 h-6 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:rotate-12 transition-transform duration-500">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 00-2 2m0 0V5a2 2 0 012-2h12a2 2 0 012 2v4" />
                       </svg>
                     </div>
-                    <h3 className="text-xl font-bold text-cyan-300 mb-2">Future: Puzzle Dashboard</h3>
-                    <p className="text-sm text-slate-400 mb-4">Concept: Your productivity as an interactive puzzle</p>
+                    <h3 className="text-xl font-bold text-cyan-600 mb-2">Future: Puzzle Dashboard</h3>
+                    <p className="text-sm text-gray-600 mb-4">Concept: Your productivity as an interactive puzzle</p>
                   </div>
                   
                   {/* Interactive Dashboard Mock */}
-                  <div className="relative bg-slate-900/60 rounded-xl p-4 border border-slate-700/50">
+                  <div className="relative bg-gray-50 rounded-xl p-4 border border-gray-200">
                     <div className="grid grid-cols-4 gap-2 mb-4">
                       {Array.from({ length: 16 }).map((_, i) => (
                         <AnimatedPuzzlePiece key={i} index={i} delay={i * 200} />
                       ))}
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-cyan-400 font-semibold">Daily Score: 87%</span>
+                      <span className="text-cyan-600 font-semibold">Daily Score: 87%</span>
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
                         <div className="w-2 h-2 bg-emerald-400 rounded-full animate-ping" style={{animationDelay: '0.5s'}}></div>
@@ -448,27 +448,27 @@ export default function Home() {
 
               {/* Command Heatmap Preview */}
               <div className="group cursor-pointer">
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-6 hover:border-emerald-400/40 transition-all duration-500 hover:shadow-xl hover:shadow-emerald-500/10 hover:scale-105">
+                <div className="bg-white backdrop-blur-sm border border-gray-200 rounded-2xl p-6 hover:border-emerald-400/60 transition-all duration-500 hover:shadow-xl hover:shadow-emerald-500/15 hover:scale-105">
                   <div className="text-center mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:rotate-12 transition-transform duration-500">
-                      <svg className="w-6 h-6 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:rotate-12 transition-transform duration-500">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                       </svg>
                     </div>
-                    <h3 className="text-xl font-bold text-emerald-300 mb-2">Future: Command Heatmaps</h3>
-                    <p className="text-sm text-slate-400 mb-4">Concept: Visualize your most-used commands</p>
+                    <h3 className="text-xl font-bold text-emerald-600 mb-2">Future: Command Heatmaps</h3>
+                    <p className="text-sm text-gray-600 mb-4">Concept: Visualize your most-used commands</p>
                   </div>
                   
                   {/* Interactive Heatmap Mock */}
-                  <div className="relative bg-slate-900/60 rounded-xl p-4 border border-slate-700/50">
+                  <div className="relative bg-gray-50 rounded-xl p-4 border border-gray-200">
                     <div className="grid grid-cols-6 gap-1 mb-4">
                       {Array.from({ length: 30 }).map((_, i) => (
                         <HeatmapCell key={i} index={i} delay={i} />
                       ))}
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-emerald-400 font-semibold">Wall Tool: 234 uses</span>
-                      <span className="text-slate-400">This week</span>
+                      <span className="text-emerald-600 font-semibold">Wall Tool: 234 uses</span>
+                      <span className="text-gray-500">This week</span>
                     </div>
                   </div>
                 </div>
