@@ -1,8 +1,9 @@
 "use client";
 
-import { WaitlistForm } from "@/components/waitlist-form";
 import { motion, useScroll, useTransform, useInView, useReducedMotion } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import { submitWaitlistEmail, validateEmail } from "@/lib/api";
+import { toast } from "sonner";
 
 // Animation variants
 const fadeInUp = {
@@ -67,7 +68,7 @@ function AnimatedPuzzlePiece({ index, delay = 0 }: { index: number; delay?: numb
         scale: 1.05, 
         transition: { duration: 0.2 } 
       }}
-      className={`h-8 rounded-lg flex items-center justify-center text-xs font-semibold cursor-pointer ${getIntensity()}`}
+      className={`h-7 rounded-lg flex items-center justify-center text-xs font-semibold cursor-pointer ${getIntensity()}`}
     >
       {index === 5 ? '92%' : index === 9 ? '78%' : index === 2 ? '85%' : ''}
     </motion.div>
@@ -116,6 +117,55 @@ export default function Home() {
   const headerInView = useInView(headerRef, { once: true });
   const heroInView = useInView(heroRef, { once: true, margin: "-100px" });
   const featuresInView = useInView(featuresRef, { once: true, margin: "-100px" });
+
+  // Email form states
+  const [topFormEmail, setTopFormEmail] = useState("");
+  const [bottomFormEmail, setBottomFormEmail] = useState("");
+  const [isTopFormLoading, setIsTopFormLoading] = useState(false);
+  const [isBottomFormLoading, setIsBottomFormLoading] = useState(false);
+  const [isTopFormSuccess, setIsTopFormSuccess] = useState(false);
+  const [isBottomFormSuccess, setIsBottomFormSuccess] = useState(false);
+
+  // Handle form submissions
+  const handleEmailSubmit = async (email: string, isTopForm: boolean) => {
+    if (!email || !validateEmail(email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    const setLoading = isTopForm ? setIsTopFormLoading : setIsBottomFormLoading;
+    const setEmail = isTopForm ? setTopFormEmail : setBottomFormEmail;
+    const setSuccess = isTopForm ? setIsTopFormSuccess : setIsBottomFormSuccess;
+    
+    setLoading(true);
+    try {
+      const result = await submitWaitlistEmail({ email });
+      
+      if (result.success) {
+        toast.success("Welcome to the waitlist!", {
+          description: result.message,
+        });
+        setEmail("");
+        setSuccess(true);
+        
+        // Reset success state after 3 seconds
+        setTimeout(() => {
+          setSuccess(false);
+        }, 3000);
+      } else {
+        toast.error("Something went wrong", {
+          description: result.message,
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting email:", error);
+      toast.error("Something went wrong", {
+        description: "Please try again later.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 relative overflow-hidden">
@@ -212,15 +262,6 @@ export default function Home() {
           {/* Hero Section */}
           <div className="mb-20">
             {/* Catchphrase */}
-            <motion.div 
-              className="mb-8" 
-              variants={fadeInUp}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-            >
-              <span className="inline-block px-4 py-2 bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 border border-cyan-500/20 rounded-full text-cyan-300 text-sm font-medium mb-6">
-                🚧 PRE-LAUNCH PREVIEW • Coming Early 2025
-              </span>
-            </motion.div>
             
             <motion.h1 
               className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight"
@@ -270,8 +311,8 @@ export default function Home() {
               variants={fadeInUp}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.5 }}
             >
-              <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-4">
-                <div className="flex items-center justify-center space-x-2 text-amber-300">
+              <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-4 mb-8">
+                <div className="flex items-center justify-center space-x-2 text-amber-300 mb-4">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -279,6 +320,47 @@ export default function Home() {
                     This is a preview of features currently in development. Join the waitlist for early access.
                   </span>
                 </div>
+                
+                {/* Simple Email Form */}
+                {isTopFormSuccess ? (
+                  <motion.div 
+                    className="flex items-center justify-center space-x-3 max-w-md mx-auto"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                  >
+                    <div className="flex items-center space-x-3 px-4 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-lg">
+                      <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-emerald-300 text-sm font-medium">You're on the waitlist!</span>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <form 
+                    className="flex items-center justify-center space-x-3 max-w-md mx-auto"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleEmailSubmit(topFormEmail, true);
+                    }}
+                  >
+                    <input
+                      type="email"
+                      placeholder="Enter your email"
+                      value={topFormEmail}
+                      onChange={(e) => setTopFormEmail(e.target.value)}
+                      className="flex-1 px-4 py-2 bg-slate-800/50 border border-slate-600/50 rounded-lg text-slate-200 placeholder-slate-400 text-sm focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/20"
+                      disabled={isTopFormLoading}
+                    />
+                    <button 
+                      type="submit"
+                      disabled={isTopFormLoading}
+                      className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-semibold rounded-lg transition-all duration-200 text-sm whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isTopFormLoading ? "Joining..." : "Join Waitlist"}
+                    </button>
+                  </form>
+                )}
               </div>
             </motion.div>
             
@@ -344,8 +426,8 @@ export default function Home() {
             
             {/* Core Value Propositions */}
             <div className="grid md:grid-cols-3 gap-8 mb-16">
-              <div className="group">
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-8 hover:border-cyan-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10">
+              <div className="group h-full">
+                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-8 hover:border-cyan-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 h-full flex flex-col">
                   <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
                     <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -354,14 +436,14 @@ export default function Home() {
                   <h3 className="text-xl font-bold text-cyan-300 mb-4">
                     Know Your Patterns
                   </h3>
-                  <p className="text-slate-300 leading-relaxed">
+                  <p className="text-slate-300 leading-relaxed flex-grow">
                     You know Revit. But do you know how <em>you</em> use Revit? Discover your command patterns, productivity metrics, and hidden workflow insights.
                   </p>
                 </div>
               </div>
 
-              <div className="group">
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-8 hover:border-emerald-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10">
+              <div className="group h-full">
+                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-8 hover:border-emerald-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 h-full flex flex-col">
                   <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
                     <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -370,14 +452,14 @@ export default function Home() {
                   <h3 className="text-xl font-bold text-emerald-300 mb-4">
                     Smart Plugin Discovery
                   </h3>
-                  <p className="text-slate-300 leading-relaxed">
+                  <p className="text-slate-300 leading-relaxed flex-grow">
                     Get personalized plugin recommendations based on your actual usage patterns. Stop wasting time—find tools that work for your specific workflow.
                   </p>
                 </div>
               </div>
 
-              <div className="group">
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-8 hover:border-purple-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10">
+              <div className="group h-full">
+                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-8 hover:border-purple-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 h-full flex flex-col">
                   <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
                     <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
@@ -386,7 +468,7 @@ export default function Home() {
                   <h3 className="text-xl font-bold text-purple-300 mb-4">
                     Make Work Feel Like Play
                   </h3>
-                  <p className="text-slate-300 leading-relaxed">
+                  <p className="text-slate-300 leading-relaxed flex-grow">
                     Transform your BIM workflow into an engaging puzzle. Track progress, compete with peers, and turn productivity into a game you want to win.
                   </p>
                 </div>
@@ -415,8 +497,8 @@ export default function Home() {
 
             <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {/* Puzzle-style Dashboard Preview */}
-              <div className="group cursor-pointer">
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-6 hover:border-cyan-400/40 transition-all duration-500 hover:shadow-xl hover:shadow-cyan-500/10 hover:scale-105">
+              <div className="group cursor-pointer h-full">
+                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-6 hover:border-cyan-400/40 transition-all duration-500 hover:shadow-xl hover:shadow-cyan-500/10 hover:scale-105 h-full flex flex-col">
                   <div className="text-center mb-6">
                     <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:rotate-12 transition-transform duration-500">
                       <svg className="w-6 h-6 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -424,11 +506,11 @@ export default function Home() {
                       </svg>
                     </div>
                     <h3 className="text-xl font-bold text-cyan-300 mb-2">Future: Puzzle Dashboard</h3>
-                    <p className="text-sm text-slate-400 mb-4">Concept: Your productivity as an interactive puzzle</p>
+                    <p className="text-sm text-slate-400 mb-4">Your productivity as an interactive puzzle</p>
                   </div>
                   
                   {/* Interactive Dashboard Mock */}
-                  <div className="relative bg-slate-900/60 rounded-xl p-4 border border-slate-700/50">
+                  <div className="relative bg-slate-900/60 rounded-xl p-4 border border-slate-700/50 flex-grow flex flex-col justify-between">
                     <div className="grid grid-cols-4 gap-2 mb-4">
                       {Array.from({ length: 16 }).map((_, i) => (
                         <AnimatedPuzzlePiece key={i} index={i} delay={i * 200} />
@@ -447,8 +529,8 @@ export default function Home() {
               </div>
 
               {/* Command Heatmap Preview */}
-              <div className="group cursor-pointer">
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-6 hover:border-emerald-400/40 transition-all duration-500 hover:shadow-xl hover:shadow-emerald-500/10 hover:scale-105">
+              <div className="group cursor-pointer h-full">
+                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-6 hover:border-emerald-400/40 transition-all duration-500 hover:shadow-xl hover:shadow-emerald-500/10 hover:scale-105 h-full flex flex-col">
                   <div className="text-center mb-6">
                     <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:rotate-12 transition-transform duration-500">
                       <svg className="w-6 h-6 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -456,11 +538,11 @@ export default function Home() {
                       </svg>
                     </div>
                     <h3 className="text-xl font-bold text-emerald-300 mb-2">Future: Command Heatmaps</h3>
-                    <p className="text-sm text-slate-400 mb-4">Concept: Visualize your most-used commands</p>
+                    <p className="text-sm text-slate-400 mb-4">Visualize your most-used commands</p>
                   </div>
                   
                   {/* Interactive Heatmap Mock */}
-                  <div className="relative bg-slate-900/60 rounded-xl p-4 border border-slate-700/50">
+                  <div className="relative bg-slate-900/60 rounded-xl p-4 border border-slate-700/50 flex-grow flex flex-col justify-between">
                     <div className="grid grid-cols-6 gap-1 mb-4">
                       {Array.from({ length: 30 }).map((_, i) => (
                         <HeatmapCell key={i} index={i} delay={i} />
@@ -475,8 +557,8 @@ export default function Home() {
               </div>
 
               {/* Plugin Discovery Preview */}
-              <div className="group cursor-pointer">
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6 hover:border-purple-400/40 transition-all duration-500 hover:shadow-xl hover:shadow-purple-500/10 hover:scale-105">
+              <div className="group cursor-pointer h-full">
+                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6 hover:border-purple-400/40 transition-all duration-500 hover:shadow-xl hover:shadow-purple-500/10 hover:scale-105 h-full flex flex-col">
                   <div className="text-center mb-6">
                     <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:rotate-12 transition-transform duration-500">
                       <svg className="w-6 h-6 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -484,11 +566,11 @@ export default function Home() {
                       </svg>
                     </div>
                     <h3 className="text-xl font-bold text-purple-300 mb-2">Future: Smart Discovery</h3>
-                    <p className="text-sm text-slate-400 mb-4">Concept: Plugins that will match your workflow</p>
+                    <p className="text-sm text-slate-400 mb-4">Plugins that will match your workflow</p>
                   </div>
                   
                   {/* Interactive Plugin List Mock */}
-                  <div className="relative bg-slate-900/60 rounded-xl p-4 border border-slate-700/50">
+                  <div className="relative bg-slate-900/60 rounded-xl p-4 border border-slate-700/50 flex-grow flex flex-col justify-between">
                     <div className="space-y-3">
                       {[
                         { name: 'AutoDimension+', match: '95%', color: 'purple' },
@@ -793,45 +875,45 @@ export default function Home() {
 
               <div className="grid md:grid-cols-3 gap-8">
                 {/* Privacy Point 1 */}
-                <div className="group">
-                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-green-500/20 rounded-2xl p-6 hover:border-green-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/10 text-center">
+                <div className="group h-full">
+                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-green-500/20 rounded-2xl p-6 hover:border-green-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/10 text-center h-full flex flex-col">
                     <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                       <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <h3 className="text-xl font-bold text-green-300 mb-3">No Project Data</h3>
-                    <p className="text-slate-300 text-sm leading-relaxed">
+                    <p className="text-slate-300 text-sm leading-relaxed flex-grow">
                       No models, drawings, or project files are ever transmitted or stored. Your intellectual property stays yours.
                     </p>
                   </div>
                 </div>
 
                 {/* Privacy Point 2 */}
-                <div className="group">
-                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-6 hover:border-emerald-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 text-center">
+                <div className="group h-full">
+                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-6 hover:border-emerald-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 text-center h-full flex flex-col">
                     <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                       <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                     </div>
                     <h3 className="text-xl font-bold text-emerald-300 mb-3">Offline Analysis</h3>
-                    <p className="text-slate-300 text-sm leading-relaxed">
+                    <p className="text-slate-300 text-sm leading-relaxed flex-grow">
                       Core analytics will work completely offline. Perfect for secure environments and strict IT policies.
                     </p>
                   </div>
                 </div>
 
                 {/* Privacy Point 3 */}
-                <div className="group">
-                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-6 hover:border-cyan-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 text-center">
+                <div className="group h-full">
+                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-6 hover:border-cyan-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 text-center h-full flex flex-col">
                     <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                       <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                     </div>
                     <h3 className="text-xl font-bold text-cyan-300 mb-3">Minimal Data Collection</h3>
-                    <p className="text-slate-300 text-sm leading-relaxed">
+                    <p className="text-slate-300 text-sm leading-relaxed flex-grow">
                       BIMSpark will only collect anonymous usage patterns. No personal data, file names, or project details will ever be stored.
                     </p>
                   </div>
@@ -863,45 +945,45 @@ export default function Home() {
 
               <div className="grid md:grid-cols-3 gap-8">
                 {/* Credibility Element 1 */}
-                <div className="group">
-                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-6 hover:border-cyan-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 text-center">
+                <div className="group h-full">
+                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-6 hover:border-cyan-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 text-center h-full flex flex-col">
                     <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                       <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-2m-12 0H3m2 0h2M9 7h6m-6 4h6m-6 4h6" />
                       </svg>
                     </div>
                     <h3 className="text-xl font-bold text-cyan-300 mb-3">15+ Years Combined</h3>
-                    <p className="text-slate-300 text-sm leading-relaxed">
+                    <p className="text-slate-300 text-sm leading-relaxed flex-grow">
                       Our team has delivered complex BIM projects across healthcare, commercial, and residential sectors
                     </p>
                   </div>
                 </div>
 
                 {/* Credibility Element 2 */}
-                <div className="group">
-                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-6 hover:border-emerald-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 text-center">
+                <div className="group h-full">
+                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-6 hover:border-emerald-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 text-center h-full flex flex-col">
                     <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                       <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                       </svg>
                     </div>
                     <h3 className="text-xl font-bold text-emerald-300 mb-3">Custom Plugin Creators</h3>
-                    <p className="text-slate-300 text-sm leading-relaxed">
+                    <p className="text-slate-300 text-sm leading-relaxed flex-grow">
                       We've built and published Revit plugins used by thousands of architects worldwide
                     </p>
                   </div>
                 </div>
 
                 {/* Credibility Element 3 */}
-                <div className="group">
-                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6 hover:border-purple-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 text-center">
+                <div className="group h-full">
+                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6 hover:border-purple-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 text-center h-full flex flex-col">
                     <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                       <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                     </div>
                     <h3 className="text-xl font-bold text-purple-300 mb-3">Performance Obsessed</h3>
-                    <p className="text-slate-300 text-sm leading-relaxed">
+                    <p className="text-slate-300 text-sm leading-relaxed flex-grow">
                       We understand the frustration of slow workflows and have optimized processes for Fortune 500 firms
                     </p>
                   </div>
@@ -972,21 +1054,18 @@ export default function Home() {
             <div className="max-w-6xl mx-auto">
               <div className="grid lg:grid-cols-3 gap-8">
                 {/* Roadmap Item 1: Plugin Store */}
-                <div className="group cursor-pointer">
-                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-8 hover:border-cyan-400/40 transition-all duration-500 hover:shadow-xl hover:shadow-cyan-500/10 hover:scale-105">
+                <div className="group cursor-pointer h-full">
+                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-8 hover:border-cyan-400/40 transition-all duration-500 hover:shadow-xl hover:shadow-cyan-500/10 hover:scale-105 h-full flex flex-col">
                     <div className="text-center mb-6">
                       <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:rotate-12 transition-transform duration-500">
                         <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
                       </div>
-                      <div className="inline-flex items-center px-3 py-1 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-cyan-400 text-xs font-medium mb-4">
-                        Coming Q2 2025
-                      </div>
                       <h3 className="text-2xl font-bold text-cyan-300 mb-4">Plugin Marketplace</h3>
                     </div>
                     
-                    <div className="space-y-4 mb-6">
+                    <div className="space-y-4 mb-6 flex-grow">
                       <p className="text-slate-300 leading-relaxed">
                         A curated marketplace where architects can discover, purchase, and share custom Revit plugins 
                         based on their specific workflow patterns.
@@ -1037,21 +1116,18 @@ export default function Home() {
                 </div>
 
                 {/* Roadmap Item 2: Gamification */}
-                <div className="group cursor-pointer">
-                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-8 hover:border-emerald-400/40 transition-all duration-500 hover:shadow-xl hover:shadow-emerald-500/10 hover:scale-105">
+                <div className="group cursor-pointer h-full">
+                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-8 hover:border-emerald-400/40 transition-all duration-500 hover:shadow-xl hover:shadow-emerald-500/10 hover:scale-105 h-full flex flex-col">
                     <div className="text-center mb-6">
                       <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:rotate-12 transition-transform duration-500">
                         <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                         </svg>
                       </div>
-                      <div className="inline-flex items-center px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-xs font-medium mb-4">
-                        Coming Q3 2025
-                      </div>
                       <h3 className="text-2xl font-bold text-emerald-300 mb-4">Revit Gamification</h3>
                     </div>
                     
-                    <div className="space-y-4 mb-6">
+                    <div className="space-y-4 mb-6 flex-grow">
                       <p className="text-slate-300 leading-relaxed">
                         Transform your daily Revit workflow into an engaging RPG-style experience with achievements, 
                         skill trees, and progression systems.
@@ -1105,21 +1181,18 @@ export default function Home() {
                 </div>
 
                 {/* Roadmap Item 3: Team Leaderboard */}
-                <div className="group cursor-pointer">
-                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-8 hover:border-purple-400/40 transition-all duration-500 hover:shadow-xl hover:shadow-purple-500/10 hover:scale-105">
+                <div className="group cursor-pointer h-full">
+                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-8 hover:border-purple-400/40 transition-all duration-500 hover:shadow-xl hover:shadow-purple-500/10 hover:scale-105 h-full flex flex-col">
                     <div className="text-center mb-6">
                       <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:rotate-12 transition-transform duration-500">
                         <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                       </div>
-                      <div className="inline-flex items-center px-3 py-1 bg-purple-500/10 border border-purple-500/20 rounded-full text-purple-400 text-xs font-medium mb-4">
-                        Coming Q4 2025
-                      </div>
                       <h3 className="text-2xl font-bold text-purple-300 mb-4">Team Leaderboards</h3>
                     </div>
                     
-                    <div className="space-y-4 mb-6">
+                    <div className="space-y-4 mb-6 flex-grow">
                       <p className="text-slate-300 leading-relaxed">
                         Foster healthy competition and collaboration with team productivity leaderboards, 
                         skill sharing, and collective achievements.
@@ -1188,31 +1261,94 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Waitlist Form */}
-          <div className="max-w-lg mx-auto mb-12">
+          {/* Main Waitlist Form */}
+          <div className="max-w-2xl mx-auto mb-12">
             <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-300 to-emerald-300 bg-clip-text text-transparent mb-4">
-                Ready to join the future of BIM?
-              </h2>
-              <p className="text-slate-400 text-sm mb-6">
-                Get early access when we launch and help shape the product with your feedback.
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-300 to-emerald-300 bg-clip-text text-transparent mb-4">
+                  Ready to join the future of BIM?
+                </h2>
+                <p className="text-slate-400 text-lg">
+                  Get early access when we launch and help shape the product with your feedback.
+                </p>
+              </div>
+              {isBottomFormSuccess ? (
+                <motion.div 
+                  className="text-center"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                >
+                  <div className="inline-flex items-center space-x-4 px-8 py-4 bg-emerald-500/20 border border-emerald-500/30 rounded-xl">
+                    <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center">
+                      <svg className="w-6 h-6 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-xl font-bold text-emerald-300 mb-1">You're on the waitlist!</h3>
+                      <p className="text-emerald-400 text-sm">We'll notify you when BIMSpark launches.</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : (
+                <form 
+                  className="flex items-center space-x-4"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleEmailSubmit(bottomFormEmail, false);
+                  }}
+                >
+                  <input
+                    type="email"
+                    placeholder="Enter your email address"
+                    value={bottomFormEmail}
+                    onChange={(e) => setBottomFormEmail(e.target.value)}
+                    className="flex-1 px-6 py-4 bg-slate-800/50 border border-slate-600/50 rounded-xl text-slate-200 placeholder-slate-400 text-lg focus:outline-none focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/20"
+                    disabled={isBottomFormLoading}
+                  />
+                  <button 
+                    type="submit"
+                    disabled={isBottomFormLoading}
+                    className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-bold rounded-xl transition-all duration-200 whitespace-nowrap text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isBottomFormLoading ? "Joining..." : "Join Waitlist"}
+                  </button>
+                </form>
+              )}
+              <p className="text-slate-500 text-center text-sm mt-4">
+                Join 2,847+ architects already on the waitlist
               </p>
-              <WaitlistForm />
             </div>
           </div>
 
-          {/* Coming Soon Badge */}
-          <div className="mt-12">
-            <div className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 border border-cyan-500/30 text-cyan-300 text-sm font-medium">
-              <span className="w-3 h-3 bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full mr-3 animate-pulse"></span>
-              Coming Soon • Early 2025 • Built by Revit Power Users
-            </div>
-          </div>
         </div>
       </main>
 
+      {/* Disclaimer */}
+      <section className="container mx-auto px-4 py-8 relative z-10">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-slate-800/20 border border-slate-700/40 rounded-xl p-6">
+            <div className="flex items-start space-x-3">
+              <svg className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h4 className="text-sm font-semibold text-slate-300 mb-2">Product Development Disclaimer</h4>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  The features, timelines, and functionality described above are planned developments and subject to change. 
+                  BIMSpark is currently in development, and final product features may differ from what is presented. 
+                  No guarantee is made regarding specific functionality, release dates, or product availability. 
+                  Join our waitlist to stay updated on actual development progress.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="container mx-auto px-4 py-8 mt-20 relative z-10">
+      <footer className="container mx-auto px-4 py-8 mt-12 relative z-10">
         <div className="text-center text-slate-500 text-sm">
           <p>&copy; 2025 BIMSpark. Where BIM meets data, productivity, and fun.</p>
         </div>

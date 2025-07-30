@@ -1,62 +1,50 @@
-import { ApiResponse, WaitlistEntry } from "@/types";
+import { WaitlistFormData, ApiResponse } from '@/types'
 
-export async function joinWaitlist(data: {
-  name: string;
-  email: string;
-  company?: string;
-  role?: string;
-}): Promise<ApiResponse<WaitlistEntry>> {
+const API_ENDPOINT = 'https://n8n.brdg.kr/webhook/51ab7dc0-54e7-4f88-bae9-d216f6641165'
+const API_USERNAME = 'ideook'
+// Note: Password should be stored in environment variable in production
+const API_PASSWORD = process.env.NEXT_PUBLIC_API_PASSWORD || ''
+
+export async function submitWaitlistEmail(data: WaitlistFormData): Promise<ApiResponse> {
   try {
-    // This would be replaced with actual API call to your backend
-    const response = await fetch("/api/waitlist", {
-      method: "POST",
+    const credentials = btoa(`${API_USERNAME}:${API_PASSWORD}`)
+    
+    const response = await fetch(API_ENDPOINT, {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${credentials}`,
       },
-      body: JSON.stringify(data),
-    });
+      body: JSON.stringify({ email: data.email }),
+    })
 
     if (!response.ok) {
-      throw new Error("Failed to join waitlist");
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    const result = await response.json();
-    return result;
+    // Parse response if needed for future use
+    await response.json()
+    
+    return {
+      success: true,
+      message: 'Successfully joined the waitlist! We\'ll be in touch soon.',
+    }
   } catch (error) {
-    console.error("API Error:", error);
+    console.error('Waitlist submission error:', error)
+    
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+      message: 'Something went wrong. Please try again later.',
+    }
   }
 }
 
-// Mock function for demonstration
-export function mockJoinWaitlist(data: {
-  name: string;
-  email: string;
-  company?: string;
-  role?: string;
-}): Promise<ApiResponse<WaitlistEntry>> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Simulate 90% success rate
-      if (Math.random() > 0.1) {
-        resolve({
-          success: true,
-          data: {
-            id: Math.random().toString(36).substr(2, 9),
-            ...data,
-            joinedAt: new Date(),
-          },
-          message: "Successfully joined waitlist",
-        });
-      } else {
-        resolve({
-          success: false,
-          error: "Failed to join waitlist. Please try again.",
-        });
-      }
-    }, 1000);
-  });
+export function validateEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
+
+// Legacy function for backward compatibility
+export async function joinWaitlist(data: WaitlistFormData): Promise<ApiResponse> {
+  return submitWaitlistEmail(data)
 }

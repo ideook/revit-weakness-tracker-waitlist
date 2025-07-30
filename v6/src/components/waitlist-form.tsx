@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 // Removed Card import as we're using custom styling
-import { mockJoinWaitlist } from "@/lib/api";
+import { submitWaitlistEmail, validateEmail } from "@/lib/api";
 
 const waitlistSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -39,17 +39,17 @@ export function WaitlistForm() {
   const onSubmit = async (data: WaitlistFormData) => {
     setIsLoading(true);
     try {
-      const result = await mockJoinWaitlist(data);
+      const result = await submitWaitlistEmail(data);
       
       if (result.success) {
         setIsSubmitted(true);
         toast.success("Welcome to the waitlist!", {
-          description: "We'll notify you when BIMSpark launches in early 2025.",
+          description: result.message,
         });
         reset();
       } else {
         toast.error("Something went wrong", {
-          description: result.error || "Please try again later.",
+          description: result.message,
         });
       }
     } catch (error) {
